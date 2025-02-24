@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HerbAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+
+    <style>
+        
+     body {
+        font-family: 'Poppins', sans-serif;
+        background: url('https://img.freepik.com/free-vector/powder-pastel-background-with-hand-drawn-elements_52683-42111.jpg');
+        margin: 0;
+        background-size: cover;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: white;
+    }
+    
+    .container {
+        background-color: rgba(4, 142, 39, 0.449);
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        width: 80vw;
+        border: 2px solid greenyellow;
+    }
+    
+    h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    
+    form {
+        margin-top: 20px;
+    }
+    
+    input[type="file"] {
+        padding: 10px;
+        background: white;
+        border: 2px solid white;
+        border-radius: 5px;
+        width: 100%;
+        background: transparent;
+        width: 40vw;
+    }
+    
+    button {
+        background: #2E7D32;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        width: 100%;
+        margin-top: 15px;
+        width: 40vw;
+    }
+    
+    button:hover {
+        background: #1B5E20;
+    }
+    
+    .result {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+    }
+    
+    img {
+        margin-top: 10px;
+        max-width: 100%;
+        border-radius: 5px;
+        /* border: 2px solid white;/ */
+    }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczOkHxg72HbBU7_S6LuzQbaWmLqZg7Mgx6JQFamLHQh8QNMhUcWwELsbIacR4ogKmtA0pjKamBinimc69TdAooGWyOiSXr1XIZ0JEVXanD1IyFeOl1HpiaEmF0yE5lIPDq0PTqyvPLEtbpUr76vg6lQr=w374-h277-s-no-gm?authuser=0" alt="Herb Image">
+    <h1>HerbAI: AI-Powered Herbal Identification</h1>
+    <form id="upload-form">
+        <input type="file" name="file" id="file" accept="image/*">
+        <button type="submit">Identify Herb</button>
+    </form>
+    <div id="result"></div>
+</div>
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = 'Processing...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', document.getElementById('file').files[0]);
+                
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Prediction failed');
+                }
+                
+                const data = await response.json();
+                resultDiv.innerText = `Predicted Herb: ${data.prediction}`;
+                resultDiv.style.color = 'green';
+            } catch (error) {
+                resultDiv.innerText = `Error: ${error.message}`;
+                resultDiv.style.color = 'red';
+                console.error('Prediction error:', error);
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+    "dandelion": {
+        "name": "Dandelion",
+        "uses": "Used for digestion and liver health.",
+        "properties": "Rich in vitamins A, C, and K."
+    },
+    "lavender": {
+        "name": "Lavender",
+        "uses": "Used for relaxation and stress relief.",
+        "properties": "Contains linalool and linalyl acetate."
+    }
+}

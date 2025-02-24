@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HerbAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://img.freepik.com/free-vector/powder-pastel-background-with-hand-drawn-elements_52683-42111.jpg');
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+        .container {
+            background-color: rgba(4, 142, 39, 0.8);
+            padding: 30px;
+            opacity: 80%;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 80vw;
+            border: 2px solid greenyellow;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        input[type="file"], button, #search-bar {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input[type="file"] {
+            background: white;
+            border: 2px solid white;
+        }
+
+        button {
+            background: #08790e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 200px;
+            border: solid 1px white;
+        }
+
+        button:hover {
+            background: #1B5E20;
+        }
+
+        .result-container {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .result-container h2 {
+            color: lightgreen;
+            font-size: 18px;
+            font-weight:100;
+        }
+
+        .result-container p {
+            color: white;
+            font-size: 18px;
+        }
+
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczOkHxg72HbBU7_S6LuzQbaWmLqZg7Mgx6JQFamLHQh8QNMhUcWwELsbIacR4ogKmtA0pjKamBinimc69TdAooGWyOiSXr1XIZ0JEVXanD1IyFeOl1HpiaEmF0yE5lIPDq0PTqyvPLEtbpUr76vg6lQr=w374-h277-s-no-gm?authuser=0" alt="Herb Image">
+        <h1>HerbAI: AI-Powered Herbal Identification</h1>
+
+        <!-- Upload Form -->
+        <form id="upload-form">
+            <input type="file" name="file" id="file" accept="image/*">
+            <button type="submit">Identify Herb</button>
+        </form>
+
+        <hr>
+
+        <!-- Search Form -->
+        <input type="text" id="search-bar" placeholder="🔍 Search herb by name...">
+        <button id="search-button">Search</button>
+
+        <div id="result" class="result-container"></div>
+    </div>
+
+    <script>
+        // Image Upload Prediction
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Processing...</p>';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', document.getElementById('file').files[0]);
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                displayHerbDetails(data);
+
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error-message">Error: ${error.message}</p>`;
+            }
+        });
+
+        // Herb Search Functionality
+        document.getElementById('search-button').addEventListener('click', async () => {
+            const herbName = document.getElementById('search-bar').value.trim();
+            if (!herbName) return;
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Searching...</p>';
+
+            try {
+                const response = await fetch(`/search?herb=${herbName}`);
+                const data = await response.json();
+                displayHerbDetails(data);
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error-message">Error: ${error.message}</p>`;
+            }
+        });
+
+        function displayHerbDetails(data) {
+            const resultDiv = document.getElementById('result');
+            if (data.error) {
+                resultDiv.innerHTML = `<p class="error-message">${data.error}</p>`;
+                return;
+            }
+            resultDiv.innerHTML = `
+                <h2>Herb: ${data.prediction}</h2>
+                <p><strong>Botanical Name:</strong> ${data.bitonic_name || 'N/A'}</p>
+                <p><strong>Medicinal Properties:</strong> ${data.medicinal_properties || 'N/A'}</p>
+                <p><strong>Traditional Uses:</strong> ${data.traditional_uses || 'N/A'}</p>
+                <p><strong>Cultural Significance:</strong> ${data.cultural_significance || 'N/A'}</p>
+            `;
+        }
+    </script>
+
+</body>
+</html>
